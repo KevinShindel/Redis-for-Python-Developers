@@ -1,0 +1,1 @@
+redis-server --loadmodule /usr/share/redis/timeseries/redistimeseries.so --loadmodule /usr/share/redis/search/module-enterprise.so
