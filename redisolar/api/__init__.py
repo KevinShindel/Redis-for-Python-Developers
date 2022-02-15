@@ -1,6 +1,3 @@
-import os
-import signal
-
 from flask import Blueprint
 from flask_restful import Api
 from redis import exceptions
@@ -13,11 +10,10 @@ from redisolar.api.site import SiteListResource
 from redisolar.api.site import SiteResource
 from redisolar.api.site_geo import SiteGeoListResource
 from redisolar.api.site_geo import SiteGeoResource
-from redisolar.core.connections import get_redis_connection
-from redisolar.dao.redis import CapacityReportDaoRedis
+from redisolar.core.connections import get_redis_timeseries_connection
+from redisolar.dao.redis import CapacityReportDaoRedis, MetricDaoRedisTimeseries
 from redisolar.dao.redis import FeedDaoRedis
 from redisolar.dao.redis import MeterReadingDaoRedis
-from redisolar.dao.redis import MetricDaoRedis
 from redisolar.dao.redis import SiteDaoRedis
 from redisolar.dao.redis import SiteGeoDaoRedis
 from redisolar.dao.redis.key_schema import KeySchema
@@ -28,9 +24,8 @@ api = Api(blueprint)
 
 def configure(app):
     key_schema = KeySchema(app.config['REDIS_KEY_PREFIX'])
-    redis_client = get_redis_connection(app.config['REDIS_HOST'],
-                                        app.config['REDIS_PORT'])
-
+    redis_client = get_redis_timeseries_connection(app.config['REDIS_HOST'],
+                                                   app.config['REDIS_PORT'])
     try:
         redis_client.ping()
     except exceptions.AuthenticationError:
@@ -69,4 +64,4 @@ def configure(app):
                      resource_class_args=(FeedDaoRedis(redis_client, key_schema), ))
     api.add_resource(MetricsResource,
                      '/metrics/<int:site_id>',
-                     resource_class_args=(MetricDaoRedis(redis_client, key_schema), ))
+                     resource_class_args=(MetricDaoRedisTimeseries(redis_client, key_schema), ))

@@ -11,7 +11,7 @@ from redisolar.models import MeterReading
 def meter_reading_dao(redis, key_schema):
     with mock.patch('redisolar.dao.redis.CapacityReportDaoRedis.update') as mock_capacity, \
             mock.patch('redisolar.dao.redis.FeedDaoRedis.insert') as mock_feed, \
-            mock.patch('redisolar.dao.redis.MetricDaoRedis.insert') as mock_metric, \
+            mock.patch('redisolar.dao.redis.MetricDaoRedisTimeseries.insert') as mock_metric, \
             mock.patch('redisolar.dao.redis.SiteStatsDaoRedis.update') as mock_site_stats:
         meter_reading_dao = MeterReadingDaoRedis(redis, key_schema)
         yield {
@@ -35,8 +35,7 @@ def test_calls_other_daos(meter_reading_dao):
     meter_reading_dao['dao'].add(reading)
     mocks = meter_reading_dao['mocks']
 
-    # Challenge #3
-    # assert mocks['site_stats'].called is True
+    assert mocks['site_stats'].called is True
     assert mocks['metric'].called is True
     assert mocks['feed'].called is True
     assert mocks['capacity'].called is True
